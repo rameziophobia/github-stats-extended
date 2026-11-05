@@ -3,17 +3,17 @@
 FROM node:24-slim AS build
 RUN corepack enable
 WORKDIR /app
+ENV DO_NOT_TRACK=1 TURBO_TELEMETRY_DISABLED=1 ASTRO_TELEMETRY_DISABLED=1
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 COPY packages/core/package.json packages/core/
 COPY apps/backend/package.json apps/backend/
 COPY apps/frontend/package.json apps/frontend/
 
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 COPY . .
-RUN pnpm run build:packages
-RUN pnpm run build:frontend
+RUN pnpm --filter @stats-organization/github-readme-stats-core build
 
 # --- Production stage ---
 
@@ -26,17 +26,16 @@ COPY packages/core/package.json packages/core/
 COPY apps/backend/package.json apps/backend/
 COPY apps/frontend/package.json apps/frontend/
 
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+RUN pnpm --filter @stats-organization/github-readme-stats-backend... install --frozen-lockfile --prod --ignore-scripts
 
 COPY --from=build /app/packages/core/build/ packages/core/build/
-COPY --chown=node:node --from=build /app/apps/frontend/build/ apps/frontend/build/
-COPY apps/backend/ apps/backend/
+COPY apps/backend/profile-app.js apps/backend/profile-express.js apps/backend/profile-stats.js apps/backend/
 
 USER node
 ENV NODE_ENV=production
+ENV DO_NOT_TRACK=1 TURBO_TELEMETRY_DISABLED=1 ASTRO_TELEMETRY_DISABLED=1
 ENV PORT=80
 EXPOSE 80
 HEALTHCHECK CMD node -e "fetch('http://localhost:80/api/status/up').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"
 
-ENTRYPOINT ["apps/backend/docker-entrypoint.sh"]
 CMD ["node", "apps/backend/profile-express.js"]

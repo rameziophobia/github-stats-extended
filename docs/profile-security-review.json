@@ -15,6 +15,7 @@
     "authenticated_destination": "https://api.github.com/graphql",
     "operations": "Fixed GraphQL queries only; no mutations.",
     "redirects": "Rejected",
+    "container": "No frontend or OAuth server files, no frontend build, no lifecycle install scripts, direct Node entrypoint; build and runtime telemetry disabled.",
     "requested_private_data": "Numeric contribution counters from the owner's profile; no repository contents, names, messages, titles or emails."
   },
   "http": {
