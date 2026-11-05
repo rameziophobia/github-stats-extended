@@ -1,0 +1,59 @@
+{
+  "review_date": "2026-11-05",
+  "upstream_stats_commit": "bb3b610cb5fd7b04c3af9d4e0ca1c0a24db263e1",
+  "upstream_streak_commit": "125aaaf200620410446ebfa51897fca3607e04fd",
+  "scope": "Token handling, outbound requests, public route exposure, errors, dependencies and contribution counting in this personal deployment.",
+  "credential": {
+    "environment_variable": "PROFILE_READ_TOKEN",
+    "exact_required_scope": ["read:user"],
+    "repository_permissions": "none",
+    "write_permissions": "none",
+    "runtime_validation": "Reject credentials unless GitHub reports exactly read:user, and reject responses for another account.",
+    "storage": "Vercel production Secret; never source, query parameters, responses, frontend files or request logs."
+  },
+  "network": {
+    "authenticated_destination": "https://api.github.com/graphql",
+    "operations": "Fixed GraphQL queries only; no mutations.",
+    "redirects": "Rejected",
+    "requested_private_data": "Numeric contribution counters from the owner's profile; no repository contents, names, messages, titles or emails."
+  },
+  "http": {
+    "entrypoint": "apps/backend/profile-express.js",
+    "public_routes": ["GET/HEAD /api", "GET/HEAD /api/status/up"],
+    "query_parameters": "Only the existing fixed username/theme/show_icons values; reject duplicates and other parameters.",
+    "output": "Aggregate SVG and credential-free liveness only.",
+    "removed_exposure": [
+      "repository cards",
+      "languages",
+      "gists",
+      "OAuth endpoints",
+      "token status",
+      "frontend scripts and analytics",
+      "caller-selected repository filters"
+    ],
+    "errors": "Generic message only; do not return or log upstream payloads or token-bearing error objects.",
+    "cache": "One hour, concurrent-request coalescing, preserve last successful aggregate card on upstream failure."
+  },
+  "counting": {
+    "period": "All contribution years returned by GitHub, aggregated once per year.",
+    "private_scope": "read:user supports aggregate private/internal contributions without granting repository-content access.",
+    "restricted_contributions": "Never add unclassified restricted contributions to the commit count.",
+    "stars": "Public repositories only.",
+    "streak": "Keeps its separate public-only token; it does not receive PROFILE_READ_TOKEN."
+  },
+  "dependency_audit": {
+    "command": "pnpm audit --prod --json",
+    "known_vulnerabilities": {
+      "critical": 0,
+      "high": 0,
+      "moderate": 0,
+      "low": 0
+    },
+    "installation": "Frozen lockfile, lifecycle scripts disabled for local review; upstream lockfile passes its release-age and supply-chain trust policies."
+  },
+  "limits": [
+    "This scoped review cannot prove the absence of unknown defects or future supply-chain compromises.",
+    "Totals describe contributions recognized and returned by GitHub, not every git commit ever created.",
+    "Only aggregate numbers are intentionally public on the profile."
+  ]
+}

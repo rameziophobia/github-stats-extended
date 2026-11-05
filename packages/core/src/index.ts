@@ -27,3 +27,7 @@ export { getConfig, loadConfigFromEnv } from "./common/config.js";
 
 export { themes } from "./themes/index.js";
 export type { ThemeName } from "./themes/index.js";
+
+// Render the aggregate-only profile card without exposing the generic API.
+export { renderStatsCard } from "./cards/stats.js";
+export { calculateRank } from "./calculateRank.js";
